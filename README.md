@@ -31,5 +31,14 @@ Voice Recognition: SpeechRecognition + PyAudio
 ```bash
 git clone https://github.com/SecuritySamurai-X/SARA.git
 
+2.
+
+3. Set environment variables=
+Create a .env file and add your Twilio credentials:
+
+TWILIO_SID=your_sid
+TWILIO_AUTH_TOKEN=your_token
+TWILIO_PHONE=your_twilio_phone
+
 
 
