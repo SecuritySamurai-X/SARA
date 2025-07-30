@@ -1,7 +1,8 @@
-SARA - Smart Assistant for Reminders and Authentication
+# SARA - Smart Assistant for Reminders and Authentication
+
 SARA is a secure, voice-enabled, multilingual reminder system designed for medical and caregiving use cases.
 
-🔐 Features
+## 🔐 Features
 💬 Voice-based medication and appointment reminders
 🌐 Multilingual support using Google Text-to-Speech (gTTS)
 🔑 Twilio OTP authentication for secure login/register
@@ -10,7 +11,7 @@ SARA is a secure, voice-enabled, multilingual reminder system designed for medic
 🧠 Cognitive-friendly UI with accessibility in mind
 📜 History Log of All Reminders
 
-🛠 Tech Stack
+## 🛠 Tech Stack
 
 Backend: Flask (Python)
 Frontend: HTML, CSS, JS
@@ -20,12 +21,12 @@ Authentication: Twilio OTP API
 Scheduler: APScheduler
 Voice Recognition: SpeechRecognition + PyAudio
 
-📌 Future Improvements
+## 📌 Future Improvements
 
 📊 Health Stats Dashboard
 📍 Geofencing with Alerts
 
-🚀 How to Run
+## 🚀 How to Run
 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/medalert.git
