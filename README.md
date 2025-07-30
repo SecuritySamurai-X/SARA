@@ -1,6 +1,6 @@
 # SARA - Smart Assistant for Reminders and Authentication
 
-SARA is a secure, voice-enabled, multilingual reminder system designed for medical and caregiving use cases.
+SARA is a secure, multilingual reminder system designed for medical and caregiving use cases.
 
 ## 🔐 Features
 💬 Voice-based medication and appointment reminders
