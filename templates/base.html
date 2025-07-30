@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SARA | Medication Reminder</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500&family=Baloo+Bhai+2&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    body {
+      font-family: 'Baloo Bhai 2', cursive;
+    }
+    .sidebar {
+      min-width: 240px;
+      background-color: #fff0f5;
+      padding: 30px 20px;
+      border-right: 1px solid #fbcfe8;
+    }
+    .sidebar .logo {
+      font-family: 'Fredoka', cursive;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      color: #333;
+      font-size: 1rem;
+    }
+    .sidebar a:hover {
+      color: #d946ef;
+    }
+  </style>
+</head>
+
+<body class="bg-pink-50 flex h-screen overflow-hidden">
+
+  {% if request.path in ['/', '/medication', '/appointments', '/about', '/profile'] %}
+  <aside class="sidebar flex flex-col">
+    <div class="text-3xl font-bold text-purple-600 logo flex items-center gap-2 mb-8">
+      <span>💖</span>
+      <span>SARA</span>
+    </div>
+
+    <nav class="flex-1 space-y-4 text-lg">
+      <a href="/"><span>🏠</span> Home</a>
+      <a href="/login"><span>🔑</span> Login</a>
+      <a href="/register"><span>📄</span> Register</a>
+      <a href="/about"><span>ℹ️</span> About Us</a>
+      <a href="/medication"><span>💊</span> Medication</a>
+      <a href="/appointments"><span>📅</span> Appointments</a>
+      <a href="/profile" class="hover:underline hover:text-pink-200">👤 Profile</a>
+    </nav>
+
+    <div class="mt-10">
+      <a href="/logout" class="text-red-600 font-semibold hover:underline">Logout</a>
+    </div>
+  </aside>
+  {% endif %}
+
+  <main class="flex-1 overflow-y-auto">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>

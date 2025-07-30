@@ -1,0 +1,65 @@
+{% extends 'base_auth.html' %}
+
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('/static/your-nurse-image.jpg');">
+  <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-3xl shadow-2xl p-10 max-w-md w-full">
+
+    <div class="flex justify-center mb-4">
+      <div class="text-4xl">💖</div>
+    </div>
+
+    <h2 class="text-3xl text-center font-bold text-purple-600 mb-1" style="font-family: 'Fredoka', cursive;">SARA</h2>
+    <p class="text-center text-gray-600 mb-6" style="font-family: 'Baloo Bhai 2', cursive;">let's get healthy Together</p>
+
+    <form method="POST" class="space-y-4">
+      <input 
+        name="username" 
+        placeholder="Email or Username" 
+        required 
+        class="w-full px-4 py-3 border border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+      >
+      <input 
+        type="password" 
+        name="password" 
+        placeholder="Password" 
+        required 
+        class="w-full px-4 py-3 border border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+      >
+
+      <div class="text-right text-sm">
+        <a href="/forgot-password" class="text-purple-600 hover:underline">Forgot Password?</a>
+      </div>
+
+  
+      <button 
+        type="submit" 
+        class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-xl transition"
+      >
+        Log In
+      </button>
+
+      <button 
+        type="submit" 
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition"
+      >
+        Send OTP
+      </button>
+    </form>
+
+<a 
+  href="/skip-login" 
+  class="w-full block text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition mt-2"
+>
+  Skip Login (Demo)
+</a>
+ 
+    <p class="text-center text-sm text-gray-600 mt-4">
+      Don’t have an account? 
+      <a href="/register" class="text-purple-600 hover:underline">Sign up</a>
+    </p>
+
+  </div>
+</div>
+
+{% endblock %}

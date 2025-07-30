@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white border border-pink-300 rounded-2xl shadow-[0_4px_30px_rgba(255,182,193,0.4)] p-8 mt-10">
+  <h2 class="text-3xl font-bold text-pink-600 mb-6 text-center">📅 Appointment Reminder</h2>
+
+  <div class="space-y-5">
+    <div>
+      <label class="block mb-1 font-medium">Select Language:</label>
+      <select id="language" class="w-full px-4 py-3 border border-pink-300 rounded-xl focus:ring focus:ring-pink-200">
+        <option>English</option>
+        <option>Hindi</option>
+        <option>Kannada</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block mb-1 font-medium">Set Appointment Time (HH:MM 24-hour):</label>
+      <input type="time" id="timeInput" class="w-full px-4 py-3 border border-pink-300 rounded-xl focus:ring focus:ring-pink-200">
+    </div>
+
+    <div class="flex justify-center gap-4">
+      <button id="setManualBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Set Manual Appointment</button>
+    </div>
+
+    <div class="flex justify-center">
+      <button id="exportBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">📥 Export CSV</button>
+    </div>
+
+    <p id="status" class="font-medium text-sm text-gray-700 text-center">Status: Waiting...</p>
+  </div>
+</div>
+
+<div class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-xl shadow p-6 mt-8">
+  <h2 class="text-lg font-bold mb-2 text-gray-800">🗂️ Appointment History</h2>
+  <div id="historyTable" class="space-y-2"></div>
+</div>
+
+<div id="calendar"></div>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+<script>
+  const languageSelect = document.getElementById('language');
+  const timeInput = document.getElementById('timeInput');
+  const status = document.getElementById('status');
+  const historyTable = document.getElementById('historyTable');
+  const exportBtn = document.getElementById('exportBtn');
+
+  let reminders = [];
+  let historyRecords = [];
+  let calendar;
+  let eventTimes = {}; // Store date -> [times]
+
+  const texts = {
+    "English": "You have an upcoming appointment. Please confirm: Will you attend?",
+    "Hindi": "आपकी एक नियोजित अपॉइंटमेंट है। कृपया पुष्टि करें: क्या आप आएंगे?",
+    "Kannada": "ನಿಮ್ಮ ಬಳಿ ಮುಂದಿನ ಭೇಟಿಯಾಗಿದೆ. ದಯವಿಟ್ಟು ದೃಢೀಕರಿಸಿ: ನೀವು ಬರುವಿರಾ?"
+  };
+
+  document.getElementById('setManualBtn').onclick = () => {
+    const time = timeInput.value;
+    if (!time) return Swal.fire('Please select a valid time');
+    reminders.push(time);
+    addEventToCalendar(time);
+    Swal.fire('Appointment Set!', `Scheduled for ${time}`, 'success');
+  };
+
+  exportBtn.onclick = () => {
+    if (historyRecords.length === 0) {
+      return Swal.fire('No records to export');
+    }
+    const csvContent = "data:text/csv;charset=utf-8," +
+      ["Date,Time,Language,Status"].join(",") + "\n" +
+      historyRecords.map(r => `${r.date},${r.time},${r.language},${r.status}`).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "appointment_history.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  function playReminder(lang) {
+    return new Promise(resolve => {
+      const utter = new SpeechSynthesisUtterance(texts[lang]);
+      utter.lang = { English: 'en-US', Hindi: 'hi-IN', Kannada: 'kn-IN' }[lang];
+      utter.onend = () => resolve();
+      speechSynthesis.speak(utter);
+    });
+  }
+
+  async function handleReminderFlow(lang) {
+    await playReminder(lang);
+    await new Promise(r => setTimeout(r, 1000));
+    showConfirmationPopup(lang);
+  }
+
+  function showConfirmationPopup(lang) {
+    Swal.fire({
+      title: '📅 Appointment Reminder',
+      text: 'Will you attend your appointment?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '✅ Yes',
+      cancelButtonText: '❌ No'
+    }).then(result => {
+      const statusText = result.isConfirmed ? 'Confirmed' : 'Not Confirmed';
+      status.innerHTML = result.isConfirmed
+        ? '<span class="text-green-600 font-bold">✅ Confirmed</span>'
+        : '<span class="text-red-600 font-bold">❌ Not Confirmed</span>';
+      updateHistory(lang, statusText);
+      Swal.fire(statusText, `Appointment ${statusText}`, result.isConfirmed ? 'success' : 'info');
+    });
+  }
+
+  function updateHistory(lang, result) {
+    const now = new Date();
+    const date = now.toLocaleDateString();
+    const time = now.toLocaleTimeString().slice(0, 5);
+
+    historyRecords.push({
+      date,
+      time,
+      language: lang,
+      status: result
+    });
+
+    const entry = document.createElement('div');
+    entry.className = `flex justify-between items-center border px-4 py-2 rounded-lg ${result === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+    entry.innerHTML = `<div>${date} ${time} [${lang}]</div><div class="text-xl font-bold">${result === 'Confirmed' ? '✅' : '❌'}</div>`;
+    historyTable.prepend(entry);
+  }
+
+  function checkReminderLoop() {
+    setInterval(() => {
+      const now = new Date();
+      const hhmm = now.toTimeString().slice(0, 5);
+      if (reminders.includes(hhmm)) {
+        const lang = languageSelect.value;
+        handleReminderFlow(lang);
+        reminders = reminders.filter(r => r !== hhmm);
+      }
+    }, 10000);
+  }
+
+  function addEventToCalendar(time) {
+    const today = new Date();
+    const [h, m] = time.split(':');
+    const eventTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m);
+    const dateKey = eventTime.toDateString();
+
+    if (!eventTimes[dateKey]) eventTimes[dateKey] = [];
+    eventTimes[dateKey].push(time);
+
+    calendar.addEvent({
+      title: '📌 Appointment',
+      start: eventTime,
+      allDay: false
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      height: 500,
+      headerToolbar: {
+        left: 'title',
+        right: 'prev,next today'
+      },
+      dateClick: function(info) {
+        const clickedDate = new Date(info.dateStr);
+        const dateKey = clickedDate.toDateString();
+        const times = eventTimes[dateKey] || [];
+        if (times.length > 0) {
+          Swal.fire('Appointments on ' + info.dateStr, times.join(', '), 'info');
+        } else {
+          Swal.fire('No Appointments', 'You have no appointments on this date.', 'info');
+        }
+      }
+    });
+    calendar.render();
+  });
+
+  checkReminderLoop();
+</script>
+{% endblock %}

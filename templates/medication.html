@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-pink-100 rounded-xl shadow-xl p-8 mt-10 text-center">
+  <h1 class="text-4xl font-bold text-purple-600 mb-6">💊 Medication Reminder</h1>
+
+  <label for="language" class="block text-lg font-medium mb-2">Select Language:</label>
+  <select id="language" class="w-full p-3 mb-4 rounded-lg border border-purple-400">
+    <option>English</option>
+    <option>Hindi</option>
+    <option>Kannada</option>
+  </select>
+
+  <label for="timeInput" class="block text-lg font-medium mb-2">Set Reminder Time (HH:MM):</label>
+  <input type="time" id="timeInput" class="w-full p-3 mb-4 rounded-lg border border-purple-400" />
+
+  <div class="flex flex-col md:flex-row justify-center gap-4 mt-4">
+    <button id="setManualBtn" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition">Set Manual Reminder</button>
+  </div>
+
+  <p id="status" class="mt-6 text-lg font-semibold text-gray-700">Status: Waiting...</p>
+</div>
+
+<div class="max-w-2xl mx-auto bg-white border mt-10 rounded-xl shadow p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold text-gray-800">📋 Reminder History</h2>
+    <button onclick="downloadHistory()" class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Download History</button>
+  </div>
+  <div id="historyTable" class="space-y-2"></div>
+</div>
+
+<script>
+  const languageSelect = document.getElementById('language');
+  const timeInput = document.getElementById('timeInput');
+  const status = document.getElementById('status');
+  const historyTable = document.getElementById('historyTable');
+
+  let reminders = [];
+  let historyData = [];
+
+  const texts = {
+    "English": "It's time for your medicine. Please take it now.",
+    "Hindi": "यह आपकी दवा लेने का समय है। कृपया अभी दवा लें।",
+    "Kannada": "ಇದು ನಿಮ್ಮ ಔಷಧಿ ತಗೊಳ್ಳುವ ಸಮಯವಾಗಿದೆ. ದಯವಿಟ್ಟು ತಕ್ಷಣ ತೆಗೆದುಕೊಳ್ಳಿ."
+  };
+
+  document.getElementById('setManualBtn').onclick = () => {
+    const time = timeInput.value;
+    if (!time) {
+      alert('Please select a valid time.');
+      return;
+    }
+    status.textContent = `⏰ Reminder set for ${time}`;
+    fetch('/save_reminder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ time, language: languageSelect.value })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        reminders.push(time);
+      } else {
+        status.textContent = "❌ Failed to save reminder.";
+      }
+    })
+    .catch(() => {
+      status.textContent = "❌ Error saving reminder.";
+    });
+  };
+
+  function playReminder(lang) {
+    return new Promise(resolve => {
+      const utter = new SpeechSynthesisUtterance(texts[lang]);
+      utter.lang = { English: 'en-US', Hindi: 'hi-IN', Kannada: 'kn-IN' }[lang];
+      utter.onend = () => resolve();
+      speechSynthesis.speak(utter);
+    });
+  }
+
+  async function handleReminderFlow(lang) {
+    await playReminder(lang);
+    await new Promise(r => setTimeout(r, 1000));
+    showConfirmationPopup(lang);
+  }
+
+  function showConfirmationPopup(lang) {
+    Swal.fire({
+      title: 'Medication Reminder',
+      text: 'Have you taken your medication?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No'
+    }).then(result => {
+      const now = new Date();
+      const entry = {
+        time: `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
+        lang,
+        status: result.isConfirmed ? 'Taken' : 'Not Taken'
+      };
+      historyData.push(entry);
+
+      if (result.isConfirmed) {
+        status.innerHTML = '<span class="text-green-600 font-bold">✅ Medication Taken</span>';
+        updateHistory(entry);
+        Swal.fire('Confirmed', 'Medication Taken ✅', 'success');
+      } else {
+        status.innerHTML = '<span class="text-red-600 font-bold">❌ Not Taken - Will Remind Again</span>';
+        updateHistory(entry);
+        Swal.fire('Reminder Again', 'You will be reminded again in 1 minute!', 'info');
+        setTimeout(() => handleReminderFlow(lang), 60000);
+      }
+    });
+  }
+
+  function updateHistory(entry) {
+    const div = document.createElement('div');
+    div.className = `flex justify-between items-center border px-4 py-2 rounded-lg ${entry.status === 'Taken' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+    div.innerHTML = `<div>${entry.time} [${entry.lang}]</div><div class="text-xl font-bold">${entry.status === 'Taken' ? '✅' : '❌'}</div>`;
+    historyTable.prepend(div);
+  }
+
+  function checkReminderLoop() {
+    setInterval(() => {
+      const now = new Date();
+      const hhmm = now.toTimeString().slice(0, 5);
+      if (reminders.includes(hhmm)) {
+        const lang = languageSelect.value;
+        handleReminderFlow(lang);
+        reminders = reminders.filter(r => r !== hhmm);
+      }
+    }, 10000);
+  }
+
+  function downloadHistory() {
+    let csv = 'Time,Language,Status\n';
+    historyData.forEach(entry => {
+      csv += `${entry.time},${entry.lang},${entry.status}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'medication_history.csv';
+    link.click();
+  }
+
+  checkReminderLoop();
+</script>
+
+<style>
+</style>
+{% endblock %}

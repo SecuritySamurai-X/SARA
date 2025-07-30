@@ -1,0 +1,38 @@
+{% extends 'base_auth.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('/static/your-nurse-image.jpg');">
+  <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-3xl shadow-2xl p-10 max-w-md w-full">
+    
+    <div class="flex justify-center mb-4">
+      <div class="text-4xl">💖</div>
+    </div>
+
+    <h2 class="text-3xl text-center font-bold text-purple-600 mb-1" style="font-family: 'Fredoka', cursive;">Verify OTP</h2>
+    <p class="text-center text-gray-600 mb-6" style="font-family: 'Baloo Bhai 2', cursive;">Please enter the OTP sent to your mobile</p>
+
+  
+    <form method="POST" class="space-y-4">
+      <input 
+        name="otp" 
+        placeholder="Enter OTP" 
+        required 
+        class="w-full px-4 py-3 border border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+      >
+
+      <button 
+        type="submit" 
+        class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition"
+      >
+        Verify
+      </button>
+    </form>
+
+    
+    <p class="text-center text-sm text-gray-600 mt-4">
+      Didn’t receive the OTP? <a href="/login" class="text-purple-600 hover:underline">Go back to Login</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
