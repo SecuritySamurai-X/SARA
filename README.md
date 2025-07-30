@@ -29,8 +29,7 @@ Voice Recognition: SpeechRecognition + PyAudio
 ## 🚀 How to Run
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/medalert.git
-cd medalert
+git clone https://github.com/SecuritySamurai-X/SARA.git
 
 
 
