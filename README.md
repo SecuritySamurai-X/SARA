@@ -1,4 +1,4 @@
-# SARA - Smart Assistant for Reminders and Authentication
+# SARA - Smart Alzheimer’s Reminder Assistant
 
 SARA is a secure, multilingual reminder system designed for medical and caregiving use cases.
 
