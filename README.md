@@ -3,13 +3,13 @@
 SARA is a secure, multilingual reminder system designed for medical and caregiving use cases.
 
 ## 🔐 Features
-💬 Voice-based medication and appointment reminders
-🌐 Multilingual support using Google Text-to-Speech (gTTS)
-🔑 Twilio OTP authentication for secure login/register
-📅 Smart scheduling using APScheduler
-👤 User registration, login, and session management
-🧠 Cognitive-friendly UI with accessibility in mind
-📜 History Log of All Reminders
+- 💬 Voice-based medication and appointment reminders
+- 🌐 Multilingual support using Google Text-to-Speech (gTTS)
+- 🔑 Twilio OTP authentication for secure login/register
+- 📅 Smart scheduling using APScheduler
+- 👤 User registration, login, and session management
+- 🧠 Cognitive-friendly UI with accessibility in mind
+- 📜 History Log of All Reminders
 
 ## 🛠 Tech Stack
 
